@@ -1,0 +1,15 @@
+.classpath
+.project
+.scala_dependencies
+.history
+.target
+.cache
+*.db
+project/boot
+project/plugins/project
+project/target
+project/project
+target
+runjetty.sh
+lift-sbt-quickstart.sublime-project
+lift-sbt-quickstart.sublime-workspace

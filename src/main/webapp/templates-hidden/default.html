@@ -1,0 +1,100 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:lift="http://liftweb.net/">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <meta name="description" content="" />
+    <meta name="keywords" content="" />
+    <title class="lift:Menu.title">Review activity in Solita</title>
+    <style class="lift:CSS.blueprint"></style>
+    <style class="lift:CSS.fancyType"></style>
+    <script id="jquery" src="/classpath/jquery.js" type="text/javascript"></script>
+    <script id="json" src="/classpath/json.js" type="text/javascript"></script>
+    <script type="text/javascript" src="/scripts/jquery-ui-1.8.16.custom.min.js"></script>
+    <script type="text/javascript" src="/scripts/jquery.ui.datepicker-fi.js"></script>
+    <script type="text/javascript" src="/scripts/jquery-ui-timepicker-addon.js"></script>
+    <script type="text/javascript" src="/scripts/jquery.tablesorter.js"></script>
+    <script type="text/javascript" src="/scripts/jquery.tablesorter.pager.js"></script>
+    <script type="text/javascript" src="/scripts/jquery.metadata.js"></script>
+    <link rel="stylesheet" href="/style/jquery-ui-1.8.16.custom.css" type="text/css" media="all" />
+    <style type="text/css">
+/* <![CDATA[ */
+.edit_error_class {
+  display: block;
+  color: red;
+}
+
+.sidebar ul {
+	margin:0;
+	padding:0;
+	border-bottom:1px solid #ccc;
+}
+	 
+
+.sidebar ul li {
+	margin:0;
+	padding:0;
+	list-style:none;
+	border:1px solid #ccc;
+	border-bottom:none;
+}
+
+.sidebar ul li a {
+	display:block;
+	padding:3px;
+	text-indent:30px;
+	text-decoration:none;
+}
+
+.sidebar ul li span {
+	display:block;
+	padding:3px;
+	text-indent:30px;
+	text-decoration:none;
+}
+
+.sidebar ul li a:hover {
+	background-color: #eee;
+}
+
+.lift_error {
+	color: red;
+	display:block;
+	text-decoration:none;
+	list-style: none;
+}
+
+/* css for timepicker */
+.ui-timepicker-div .ui-widget-header{ margin-bottom: 8px; }
+.ui-timepicker-div dl{ text-align: left; }
+.ui-timepicker-div dl dt{ height: 25px; }
+.ui-timepicker-div dl dd{ margin: -25px 0 10px 65px; }
+.ui-timepicker-div td { font-size: 90%; }
+
+
+  /* ]]> */
+  </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="column span-12 last" style="text-align: right">
+        <h1 class="alt">Review activity in Solita<img alt="" id="ajax-loader" style="display:none; margin-bottom: 0px; margin-left: 5px" src="/images/ajax-loader.gif"></h1>
+      </div>
+
+      <hr />
+
+      <div class="column span-6 colborder sidebar">
+        <hr class="space" />
+
+	<span class="lift:Menu.builder"></span>
+
+        <div class="lift:Msgs?showAll=true"></div>
+        <hr class="space" />
+      </div>
+
+      <div class="column span-17 last">
+        <div id="content">The main content will get bound here</div>
+      </div>
+
+      <hr />
+    </div>
+  </body>
+</html>
