@@ -17,30 +17,51 @@ import net.liftweb.http.SessionVar
 object CrusibleClient {
 
     object reviews extends SessionVar[Box[List[Review]]](Empty)
-
-    def getSelectedTrainingSession = reviews.is
     
-	implicit val formats = new DefaultFormats {
-		override def dateFormatter = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.mmmZ")
-	}
+    private var authtoken: Box[String] = None
+    
+  	implicit val formats = new DefaultFormats {
+  		override def dateFormatter = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.mmmZ")
+  	}
    
     def main(args: Array[String]) {
-        val reviews = getReviewData
+        val reviews = getAllReviewData
         println("Fetched %d reviews".format(reviews.length))
     }
-  
-    def getReviews: List[Review] = {
-      reviews openOr getReviewData
+
+    private def getAuthToken: String = {
+      authtoken openOr loginAndGetToken(sysprop("username"), sysprop("password"))
     }
     
-    def getReviewData: List[Review] = {
-        
-        val authtoken = loginAndGetToken(sysprop("username"), sysprop("password"))
+    def getReviews: List[Review] = reviews openOr getAllReviewData
 
-        val json = JsonParser.parse(getMetricsAsJson(authtoken))
+    private def getReviewsForYear(year: Int): List[Review] = {
+      getReviewData(yearFilter(year) _)
+    }
+    
+    private def yearFilter(year: Int)(review: Review) = {
+      review.createDate.getYear() == year && 
+      notExerciseAndContainsCommentsFilter(review)
+    }
+
+    private def getAllReviewData: List[Review] = {
+      getReviewData(notExerciseAndContainsCommentsFilter)
+    }
+    
+    private def notExerciseAndContainsCommentsFilter(review: Review) = {
+      review.projectKey != "EXERCISES" && 
+      containsComments(review.permaId.id, getAuthToken)
+    }
+
+    private def getReviewData(filter: Review => Boolean): List[Review] = {
+        
+        val json = JsonParser parse getMetricsAsJson
         val review = json.extract[ReviewData]
         
-        val reviewList = review.reviewData.filter(_.projectKey != "EXERCISES").sortBy(_.createDate)
+        val reviewList = review.reviewData
+            .filter(filter(_))
+            .sortBy(_.createDate)
+            
         reviews.set(Full(reviewList))
         
         reviews openOr List()
@@ -53,8 +74,36 @@ object CrusibleClient {
       
       reviewsPerAuthor.toList.sortBy(_._2).reverse
     }   
+        
+    private def getMetricsAsJson: String = {
+        // states: sDraft,Approval, Review, Summarize, Closed, Dead, Rejected, Unknown
+        call("http://review.solita.fi/rest-service/reviews-v1.json?FEAUTH=" + 
+            getAuthToken + "&state=Draft,Approval,Review,Summarize,Closed,Unknown");
+    }
     
-    def call(url: String): String = {
+    private def sysprop(key: String): String = {
+      sys.props.get(key).get
+    }
+    
+    private def loginAndGetToken(username: String, pass: String): String = {
+        val responseBody = call("http://review.solita.fi/rest-service/auth-v1/login?userName="
+            +username+"&password="+pass);
+    
+        val xml = XML.loadString(responseBody)
+        val token = xml \\ "token"
+    	
+        token.text
+    }
+    
+    private def containsComments(reviewKey: String, authtoken: String) = {
+      //val responseBody = call("http://review.solita.fi/rest-service/reviews-v1/"+
+      val responseBody = call("http://review.solita.fi/rest-service/"+
+          reviewKey+"/comments.json?FEAUTH=" + authtoken);
+      
+      responseBody.contains("versionedLineCommentData")
+    }
+    
+    private def call(url: String): String = {
         val httpclient = new DefaultHttpClient
         try {
             val request = new HttpGet(url)
@@ -63,33 +112,10 @@ object CrusibleClient {
             val responseBody = httpclient.execute(request, responseHandler)
 
             responseBody
-    	
+      
         } finally {
-    	  httpclient.getConnectionManager.shutdown
+        httpclient.getConnectionManager.shutdown
         }
     }
-    
-    def getMetricsAsJson(authtoken: String): String = {
-        // states: sDraft,Approval, Review, Summarize, Closed, Dead, Rejected, Unknown
-        call("http://review.solita.fi/rest-service/reviews-v1.json?FEAUTH=" + authtoken + "&state=Draft,Approval,Review,Summarize,Closed,Unknown");
-    }
-    
-    def sysprop(key: String): String = {
-      sys.props.get(key).get
-    }
-    
-    def loginAndGetToken(username: String, pass: String): String = {
-        val responseBody = call("http://review.solita.fi/rest-service/auth-v1/login?userName="+username+"&password="+pass);
-    
-        val xml = XML.loadString(responseBody)
-        val token = xml \\ "token"
-    	
-        token.text
-    }
-    
-    def getReviewDetails(authtoken: String, reviewKey: String) = {
-      // todo
-      val responseBody = call("http://review.solita.fi/rest-service/"+reviewKey+"/reviewitems.json?FEAUTH=" + authtoken);
-    }
-    
+
 }

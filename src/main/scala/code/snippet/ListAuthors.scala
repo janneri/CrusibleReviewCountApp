@@ -11,16 +11,15 @@ import Helpers._
 
 class ListAuthors {
   
-    val dateformat = new java.text.SimpleDateFormat("dd.mm.yyyy")
-  
     def listAuthors = {
       
       val reviewsPerAuthor = CrusibleClient.getReviewsPerAuthor
       
       "#authorCount" #> reviewsPerAuthor.length & 
-      ".author *" #> reviewsPerAuthor.map(author =>
-          ".name *" #> author._1 &
-          ".reviewCount *" #> author._2
+      ".author *" #> reviewsPerAuthor.zipWithIndex.map(author =>
+          ".rank *" #> author._2 &
+          ".name *" #> author._1._1 &
+          ".reviewCount *" #> author._1._2
       )
     }
 }
