@@ -17,7 +17,7 @@ class ListAuthors {
       
       "#authorCount" #> reviewsPerAuthor.length & 
       ".author *" #> reviewsPerAuthor.zipWithIndex.map(author =>
-          ".rank *" #> author._2 &
+          ".rank *" #> (1+author._2) &
           ".name *" #> author._1._1 &
           ".reviewCount *" #> author._1._2
       )
