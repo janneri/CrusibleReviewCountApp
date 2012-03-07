@@ -33,7 +33,7 @@ object CrusibleClient {
       authtoken openOr loginAndGetToken(sysprop("username"), sysprop("password"))
     }
     
-    def getReviews: List[Review] = reviews openOr getAllReviewData
+    def getReviews: List[Review] = reviews openOr getReviewsForYear(2012)
 
     private def getReviewsForYear(year: Int): List[Review] = {
       getReviewData(yearFilter(year) _)
@@ -96,8 +96,7 @@ object CrusibleClient {
     }
     
     private def containsComments(reviewKey: String, authtoken: String) = {
-      //val responseBody = call("http://review.solita.fi/rest-service/reviews-v1/"+
-      val responseBody = call("http://review.solita.fi/rest-service/"+
+      val responseBody = call("http://review.solita.fi/rest-service/reviews-v1/"+
           reviewKey+"/comments.json?FEAUTH=" + authtoken);
       
       responseBody.contains("versionedLineCommentData")

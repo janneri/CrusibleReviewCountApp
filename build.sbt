@@ -29,3 +29,5 @@ libraryDependencies ++= Seq(
   "org.apache.httpcomponents" % "httpclient" % "4.1.2",
   "ch.qos.logback" % "logback-classic" % "0.9.26" % "compile->default" // Logging
 )
+
+port in container.Configuration := 9999
