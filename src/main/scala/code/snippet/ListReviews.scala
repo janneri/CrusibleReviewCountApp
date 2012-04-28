@@ -11,7 +11,7 @@ import Helpers._
 
 class ListReviews {
   
-    val dateformat = new java.text.SimpleDateFormat("dd.mm.yyyy")
+    val dateformat = new java.text.SimpleDateFormat("dd.MM.yyyy")
   
     def listReviews = {
 

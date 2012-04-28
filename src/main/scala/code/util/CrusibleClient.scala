@@ -13,6 +13,7 @@ import net.liftweb.common._
 import code.model.JsonClasses._
 import scala.xml.XML
 import net.liftweb.http.SessionVar
+import org.joda.time.DateTime
 
 object CrusibleClient {
 
@@ -25,7 +26,7 @@ object CrusibleClient {
   	}
    
     def main(args: Array[String]) {
-        val reviews = getAllReviewData
+        val reviews = getReviewsForYear(2012)
         println("Fetched %d reviews".format(reviews.length))
     }
 
@@ -33,14 +34,16 @@ object CrusibleClient {
       authtoken openOr loginAndGetToken(sysprop("username"), sysprop("password"))
     }
     
-    def getReviews: List[Review] = reviews openOr getAllReviewData
+    def getReviews: List[Review] = reviews openOr getReviewsForYear(2012)
 
     private def getReviewsForYear(year: Int): List[Review] = {
+      println("finding reviews for year " + year)
       getReviewData(yearFilter(year) _)
     }
     
     private def yearFilter(year: Int)(review: Review) = {
-      review.createDate.getYear() == year && 
+      val createDate = new DateTime(review.createDate)
+      createDate.getYear() == year && 
       notExerciseAndContainsCommentsFilter(review)
     }
 
@@ -49,6 +52,7 @@ object CrusibleClient {
     }
     
     private def notExerciseAndContainsCommentsFilter(review: Review) = {
+      
       review.projectKey != "EXERCISES" && 
       containsComments(review.permaId.id, getAuthToken)
     }
@@ -95,10 +99,9 @@ object CrusibleClient {
         token.text
     }
     
-    private def containsComments(reviewKey: String, authtoken: String) = {
-      //val responseBody = call("http://review.solita.fi/rest-service/reviews-v1/"+
-      val responseBody = call("http://review.solita.fi/rest-service/"+
-          reviewKey+"/comments.json?FEAUTH=" + authtoken);
+    private def containsComments(reviewKey: String, authtoken: String): Boolean = {
+      val responseBody = call("http://review.solita.fi/rest-service/reviews-v1/"+
+          reviewKey+"/comments?FEAUTH=" + authtoken);
       
       responseBody.contains("versionedLineCommentData")
     }
