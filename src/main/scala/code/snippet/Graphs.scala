@@ -16,7 +16,16 @@ import org.joda.time.DateTime
 import java.util.Calendar
 import scala.util.Random
 
+case class Month(year: Int, month: Int) {
+  def between(start: Month, end: Month) = {
+    start.year <= year && start.month <= month &&
+    year <= end.year && month <= end.month
+  }
+}
+
 class Graphs {
+
+  implicit def asMonth(d: DateTime): Month = Month(d.getYear, d.getMonthOfYear)
 
   def randomColor(): String = {
       def randomChar: String = {
@@ -32,11 +41,10 @@ class Graphs {
 
       
   def getMonthlyStatsChartUrl(width: String, height: String, reviewDates: List[DateTime]) = {
-    def d(y: Int, m: Int, d: Int) = new DateTime(y, m, d, 0, 0, 0, 0)
     
     def statsForMonth(y: Int, m: Int, reviewDates: List[DateTime]) = {
-      val month = d(y, m, 1)
-      (y, m, (reviewDates.filter(date => equalYearMonth(month, date))).size)
+      val month = Month(y, m)
+      (y, m, (reviewDates.filter(month == asMonth(_))).size)
     }
     
     def getDataForYear(year: Int, yearlyStats: List[(Int, Int, Int)]): String = {
@@ -55,11 +63,6 @@ class Graphs {
       (reviewDates.filter(_.getYear() == year)).size
     
     
-    def betweenOrEqual(start: DateTime, end: DateTime, date: DateTime) = {
-      (start.isBefore(date) || start.isEqual(date)) &&
-      (date.isBefore(end) || date.isEqual(end))
-    }
-    
     val sortedReviewDates = reviewDates.sort((d1, d2) => d1.isBefore(d2))
     
     val firstdate = sortedReviewDates.head 
@@ -69,7 +72,7 @@ class Graphs {
     
     val stats = for (year <- firstyear to lastyear;
                      month <- 1 to 12
-                     if betweenOrEqual(firstdate, lastdate, d(year, month, 1)))
+                     if Month(year, month).between(firstdate, lastdate))
       yield statsForMonth(year, month, sortedReviewDates)
     
     println(stats)
@@ -98,18 +101,7 @@ class Graphs {
             scaleForText + data + legends + legendpos + margins            
   }
 
-//    def getReviewsPerMonth: List[(String, Int)]  = {
-//      val reviewDates = CrusibleClient.getReviewData.map(data => data.createDate)
-//      
-//      val yearmonths = reviewDates.map(date => (date.getYear(), date.getMonth()))
-//      val groupedYearMonths = yearmonths.groupBy {pair => pair}
-//      val monthlyCounts = groupedYearMonths.map(x => (x._1, x._2.length))
-//      
-//      val formatted = monthlyCounts.toList.map(pair => (pair._1._1 + "/" + pair._1._2, pair._2))
-//      formatted.sort( (pair1, pair2) => pair1._1 < pair2._1 )
-//    }
-  
-  	def render = {
+  def render = {
       val width = "400"
       val height = "225"
 
@@ -117,6 +109,6 @@ class Graphs {
           CrusibleClient.getReviews.map(data => new DateTime(data.createDate)))
       
       <img width={width} height={height} src={googleUrl} />
-    }
+  }
 	
 }
